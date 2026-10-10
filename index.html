@@ -1,0 +1,1174 @@
+﻿<title>UIAnim</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<meta name="description" content="UIAnim : librairie Lua gratuite pour animer les interfaces Roblox Studio. Shake, pulse, bounce, slide, flash, fade et rainbow prêts à copier-coller, sans dépendance.">
+<meta name="keywords" content="roblox studio, lua, luau, animation ui, roblox gui, tween, shake effect, roblox scripting, module script">
+<meta property="og:type" content="website">
+<meta property="og:title" content="UIAnim — animations d'UI pour Roblox Studio">
+<meta property="og:description" content="Librairie Lua gratuite : shake, pulse, bounce, fade, slide, flash, rainbow, typewriter pour vos GUI Roblox. Copiez-collez dans un ModuleScript.">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "UIAnim",
+  "description": "Librairie Lua pour animer les interfaces utilisateur dans Roblox Studio : shake, pulse, bounce, slide, flash, fade, rainbow, typewriter.",
+  "programmingLanguage": "Lua",
+  "runtimePlatform": "Roblox Studio",
+  "license": "https://opensource.org/licenses/MIT"
+}
+</script>
+<style>
+  /* Layout: sticky top nav + single-column flow; hero opens with a live grid of
+     effect demos the visitor can trigger; API reference as a repeating card list. */
+  :root{
+    --bg:#0b0d12; --surface:#12151c; --surface-2:#181c26; --border:#242a38;
+    --fg:#e9ebf1; --fg-muted:#99a2b8; --fg-faint:#5e6680;
+    --accent:#7c5cff; --accent-soft:#2a2240;
+    --accent-2:#39e3c6; --danger:#ff5468;
+    --font-display:'Unbounded','Segoe UI',sans-serif;
+    --font-body:'Plus Jakarta Sans','Segoe UI',sans-serif;
+    --font-mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+    color-scheme:dark;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#f6f5fb; --surface:#ffffff; --surface-2:#f0eefa; --border:#e2e0f0;
+      --fg:#1b1a26; --fg-muted:#5c5a70; --fg-faint:#8a88a0;
+      --accent:#6a3dff; --accent-soft:#ece6ff;
+      --accent-2:#0ea894; --danger:#d93a52;
+      color-scheme:light;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#f6f5fb; --surface:#ffffff; --surface-2:#f0eefa; --border:#e2e0f0;
+    --fg:#1b1a26; --fg-muted:#5c5a70; --fg-faint:#8a88a0;
+    --accent:#6a3dff; --accent-soft:#ece6ff;
+    --accent-2:#0ea894; --danger:#d93a52;
+    color-scheme:light;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font-family:var(--font-body); line-height:1.55;
+    padding-inline:20px;
+  }
+  a{color:var(--accent-2);}
+  h1,h2,h3{font-family:var(--font-display); text-wrap:balance; margin:0 0 .4em;}
+  code,pre{font-family:var(--font-mono);}
+  .wrap{max-width:980px; margin-inline:auto;}
+  .eyebrow{
+    font-family:var(--font-mono); font-size:.78rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--accent-2); margin-bottom:.6em;
+  }
+
+  /* ---------- nav ---------- */
+  nav.topbar{
+    position:sticky; top:env(safe-area-inset-top,0px); z-index:50;
+    background:color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+    margin-inline:-20px; padding-inline:20px;
+  }
+  .topbar-inner{
+    max-width:980px; margin-inline:auto;
+    display:flex; align-items:center; gap:18px;
+    padding-block:14px; overflow-x:auto;
+  }
+  .brand{
+    font-family:var(--font-display); font-weight:800; font-size:1.05rem;
+    color:var(--fg); white-space:nowrap; text-decoration:none;
+    display:flex; align-items:center; gap:8px;
+  }
+  .brand .dot{width:9px;height:9px;border-radius:3px;background:var(--accent);
+    box-shadow:0 0 0 4px var(--accent-soft);}
+  .topnav-links{display:flex; gap:4px; white-space:nowrap; margin-left:auto;}
+  .topnav-links a{
+    font-size:.88rem; color:var(--fg-muted); text-decoration:none;
+    padding:7px 10px; border-radius:7px;
+  }
+  .topnav-links a:hover{color:var(--fg); background:var(--surface-2);}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    font-family:var(--font-body); font-weight:600; font-size:.85rem;
+    border:1px solid var(--border); background:var(--surface-2); color:var(--fg);
+    padding:8px 13px; border-radius:8px; cursor:pointer;
+    display:inline-flex; align-items:center; gap:7px; white-space:nowrap;
+  }
+  .btn:hover{border-color:var(--accent);}
+  .btn:focus-visible, a:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .btn-accent{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .btn-accent:hover{filter:brightness(1.08);}
+  .btn-ghost{background:transparent;}
+
+  /* ---------- hero ---------- */
+  header.hero{padding-block:56px 36px;}
+  .hero h1{font-size:clamp(2.3rem,6vw,3.4rem); font-weight:800; letter-spacing:-.01em;}
+  .hero p.lead{color:var(--fg-muted); font-size:1.08rem; max-width:52ch; margin:0 0 22px;}
+  .hero-ctas{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;}
+  .badges{display:flex; gap:8px; flex-wrap:wrap; margin-top:18px;}
+  .badge{
+    font-family:var(--font-mono); font-size:.74rem; color:var(--fg-faint);
+    border:1px solid var(--border); border-radius:999px; padding:4px 10px;
+  }
+
+  /* ---------- demo grid ---------- */
+  .demo-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:12px; margin-top:34px;
+  }
+  .demo-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:18px; display:flex; flex-direction:column; gap:14px; min-width:0;
+  }
+  .demo-name{font-family:var(--font-mono); font-size:.82rem; color:var(--fg-muted);}
+  .demo-stage{
+    height:72px; display:flex; align-items:center; justify-content:center;
+    border-radius:10px; background:var(--surface-2); overflow:hidden; position:relative;
+  }
+  .demo-subject{
+    --demo-base:var(--accent);
+    width:40px; height:40px; border-radius:10px; background:var(--demo-base);
+  }
+  .demo-subject.text-subject{
+    width:auto; height:auto; background:none; border-radius:0;
+    font-family:var(--font-display); font-weight:700; color:var(--accent);
+    font-size:.95rem;
+  }
+  .demo-actions{display:flex; gap:8px; flex-wrap:wrap;}
+  .intensity-row{
+    display:flex; align-items:center; gap:8px; font-size:.78rem; color:var(--fg-muted);
+  }
+  .intensity-label{font-family:var(--font-mono); white-space:nowrap;}
+  .intensity-row input[type="range"]{
+    flex:1; min-width:0; accent-color:var(--accent); height:4px;
+  }
+  .intensity-row output{
+    font-family:var(--font-mono); font-size:.76rem; color:var(--fg); min-width:3.4em; text-align:right;
+    font-variant-numeric:tabular-nums;
+  }
+  .btn.btn-ghost.copy-demo{font-size:.78rem; padding:8px 11px;}
+
+  /* demo animations */
+  @keyframes demoShake{10%,90%{transform:translate3d(calc(var(--fx-amt,6px) * -0.17),0,0)}20%,80%{transform:translate3d(calc(var(--fx-amt,6px) * 0.5),0,0)}30%,50%,70%{transform:translate3d(calc(var(--fx-amt,6px) * -1),0,0)}40%,60%{transform:translate3d(var(--fx-amt,6px),0,0)}}
+  @keyframes demoWiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(var(--fx-amt,8deg))}75%{transform:rotate(calc(var(--fx-amt,8deg) * -1))}}
+  @keyframes demoPulse{0%,100%{transform:scale(1)}50%{transform:scale(var(--fx-amt,1.15))}}
+  @keyframes demoBounce{0%{transform:scale(.35);opacity:.3}60%{transform:scale(1.1);opacity:1}100%{transform:scale(1)}}
+  @keyframes demoSlide{from{transform:translateX(var(--fx-amt,60px));opacity:0}to{transform:translateX(0);opacity:1}}
+  @keyframes demoFlash{0%,100%{background:var(--demo-base)}50%{background:var(--danger)}}
+  @media (prefers-reduced-motion: no-preference){
+    .anim-shake{animation:demoShake .5s both;}
+    .anim-wiggle{animation:demoWiggle .5s both;}
+    .anim-pulse{animation:demoPulse .3s ease;}
+    .anim-bounce{animation:demoBounce .6s cubic-bezier(.34,1.56,.64,1) both;}
+    .anim-slide{animation:demoSlide .4s ease both;}
+    .anim-flash{animation:demoFlash .3s ease 2;}
+    .anim-rainbow{animation:demoRainbow 3s linear infinite;}
+  }
+  @keyframes demoRainbow{to{filter:hue-rotate(360deg);}}
+  .is-faded{opacity:0; transition:opacity .35s ease;}
+  .fade-subject{transition:opacity .35s ease;}
+  .typewriter-cursor{display:inline-block; width:2px; background:var(--accent); margin-left:2px;}
+  @media (prefers-reduced-motion: no-preference){
+    .typewriter-cursor.blinking{animation:blink 1s step-end infinite;}
+  }
+  @keyframes blink{50%{opacity:0;}}
+
+  /* ---------- sections ---------- */
+  section{padding-block:44px; border-top:1px solid var(--border);}
+  section h2{font-size:1.5rem;}
+  section > p.section-lead{color:var(--fg-muted); max-width:62ch; margin-bottom:24px;}
+
+  .steps{display:grid; gap:14px; counter-reset:step;}
+  .step{
+    display:grid; grid-template-columns:auto 1fr; gap:14px;
+    background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px;
+  }
+  .step-num{
+    width:28px; height:28px; border-radius:8px; background:var(--accent-soft); color:var(--accent);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-mono); font-weight:600; font-size:.85rem; flex-shrink:0;
+  }
+  .step h3{font-size:1rem; margin-bottom:.3em; font-family:var(--font-body); font-weight:700;}
+  .step p{margin:0; color:var(--fg-muted); font-size:.92rem;}
+
+  /* ---------- code blocks ---------- */
+  .code-block{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    overflow:hidden; margin-block:10px; min-width:0;
+  }
+  .code-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 12px; border-bottom:1px solid var(--border); background:var(--surface-2);
+  }
+  .code-lang{font-family:var(--font-mono); font-size:.72rem; color:var(--fg-faint); letter-spacing:.08em; text-transform:uppercase;}
+  .copy-btn{
+    font-family:var(--font-mono); font-size:.72rem; color:var(--fg-muted);
+    background:none; border:1px solid var(--border); border-radius:6px;
+    padding:4px 9px; cursor:pointer;
+  }
+  .copy-btn:hover{color:var(--fg); border-color:var(--accent);}
+  .copy-btn.copied{color:var(--accent-2); border-color:var(--accent-2);}
+  .code-block pre{
+    margin:0; padding:14px; overflow-x:auto; font-size:.84rem; line-height:1.6; color:#d7dae4;
+  }
+  :root[data-theme="light"] .code-block pre, @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .code-block pre{color:#2b2a3a;}}
+
+  /* ---------- api cards ---------- */
+  .api-list{display:flex; flex-direction:column; gap:16px;}
+  .api-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px; min-width:0;
+  }
+  .api-card h3{
+    font-family:var(--font-mono); font-size:1.02rem; color:var(--fg); font-weight:600;
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  }
+  .api-card h3 .fn-dot{color:var(--accent-2);}
+  .api-card .desc{color:var(--fg-muted); font-size:.92rem; margin:4px 0 12px;}
+  .param-table{width:100%; border-collapse:collapse; font-size:.82rem; margin-bottom:4px;}
+  .param-table th{
+    text-align:left; color:var(--fg-faint); font-weight:600; font-size:.72rem;
+    text-transform:uppercase; letter-spacing:.06em; padding:6px 10px; border-bottom:1px solid var(--border);
+  }
+  .param-table td{padding:7px 10px; border-bottom:1px solid var(--border); color:var(--fg-muted); font-family:var(--font-mono); font-size:.8rem;}
+  .param-table tr:last-child td{border-bottom:none;}
+  .param-table td.pname{color:var(--fg); font-family:var(--font-mono);}
+  details.api-example{margin-top:10px;}
+  details.api-example summary{
+    cursor:pointer; font-size:.84rem; color:var(--accent-2); font-family:var(--font-mono);
+    list-style:none; display:flex; align-items:center; gap:6px;
+  }
+  details.api-example summary::-webkit-details-marker{display:none;}
+  details.api-example summary::before{content:"▸"; transition:transform .15s ease;}
+  details.api-example[open] summary::before{transform:rotate(90deg);}
+
+  /* ---------- full source ---------- */
+  .source-shell{max-height:480px; overflow:auto; border-radius:12px;}
+  .source-shell pre{white-space:pre;}
+  .source-status{font-family:var(--font-mono); font-size:.8rem; color:var(--fg-faint); padding:14px;}
+
+  footer{padding-block:34px 60px; color:var(--fg-faint); font-size:.84rem;}
+  footer a{color:var(--fg-muted);}
+
+  @media (max-width:600px){
+    .topnav-links a:nth-child(4){display:none;}
+  }
+</style>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#top"><span class="dot"></span>UIAnim</a>
+    <div class="topnav-links">
+      <a href="#demo">Démo</a>
+      <a href="#installation">Installation</a>
+      <a href="#api">API</a>
+      <a href="#source">Script complet</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap" id="top">
+
+  <header class="hero" id="demo">
+    <div class="eyebrow">Librairie Luau — animations d'UI</div>
+    <h1>Des interfaces Roblox qui bougent, sans réinventer le tween.</h1>
+    <p class="lead">UIAnim est un module Luau unique qui ajoute shake, pulse, bounce, fade,
+      slide, flash, rainbow et typewriter à n'importe quel GuiObject. Un require, un appel
+      de fonction, c'est animé.</p>
+    <div class="hero-ctas">
+      <a class="btn btn-accent" href="#source">Copier le script</a>
+      <a class="btn btn-ghost" href="#installation">Voir l'installation</a>
+    </div>
+    <div class="badges">
+      <span class="badge">Luau strict</span>
+      <span class="badge">Licence MIT</span>
+      <span class="badge">Zéro dépendance</span>
+      <span class="badge">~250 lignes</span>
+    </div>
+
+    <div class="demo-grid">
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.Shake</span>
+        <div class="demo-stage"><div class="demo-subject" id="stage-shake"></div></div>
+        <label class="intensity-row"><span class="intensity-label">intensity</span>
+          <input type="range" min="2" max="20" step="1" value="6" id="intensity-shake" aria-label="Intensité de Shake">
+          <output id="intensity-shake-out">6px</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="shake">Tester</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="shake">Copier</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.Wiggle</span>
+        <div class="demo-stage"><div class="demo-subject" id="stage-wiggle"></div></div>
+        <label class="intensity-row"><span class="intensity-label">angle</span>
+          <input type="range" min="2" max="30" step="1" value="8" id="intensity-wiggle" aria-label="Angle de Wiggle">
+          <output id="intensity-wiggle-out">8°</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="wiggle">Tester</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="wiggle">Copier</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.Pulse</span>
+        <div class="demo-stage"><div class="demo-subject" id="stage-pulse"></div></div>
+        <label class="intensity-row"><span class="intensity-label">scale</span>
+          <input type="range" min="1.05" max="2" step="0.05" value="1.15" id="intensity-pulse" aria-label="Échelle de Pulse">
+          <output id="intensity-pulse-out">1.15×</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="pulse">Tester</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="pulse">Copier</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.Bounce</span>
+        <div class="demo-stage"><div class="demo-subject" id="stage-bounce"></div></div>
+        <label class="intensity-row"><span class="intensity-label">duration</span>
+          <input type="range" min="0.2" max="1.2" step="0.05" value="0.6" id="intensity-bounce" aria-label="Durée de Bounce">
+          <output id="intensity-bounce-out">0.6s</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="bounce">Tester</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="bounce">Copier</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.SlideIn</span>
+        <div class="demo-stage"><div class="demo-subject" id="stage-slide"></div></div>
+        <label class="intensity-row"><span class="intensity-label">distance</span>
+          <input type="range" min="20" max="150" step="5" value="60" id="intensity-slide" aria-label="Distance de SlideIn">
+          <output id="intensity-slide-out">60px</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="slide">Tester</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="slide">Copier</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.Flash</span>
+        <div class="demo-stage"><div class="demo-subject" id="stage-flash"></div></div>
+        <label class="intensity-row"><span class="intensity-label">count</span>
+          <input type="range" min="1" max="5" step="1" value="2" id="intensity-flash" aria-label="Nombre de clignotements de Flash">
+          <output id="intensity-flash-out">2×</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="flash">Tester</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="flash">Copier</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.FadeIn / FadeOut</span>
+        <div class="demo-stage"><div class="demo-subject fade-subject" id="stage-fade"></div></div>
+        <label class="intensity-row"><span class="intensity-label">duration</span>
+          <input type="range" min="0.1" max="1.5" step="0.05" value="0.3" id="intensity-fade" aria-label="Durée de Fade">
+          <output id="intensity-fade-out">0.3s</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="fade">Tester</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="fade">Copier</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.Rainbow</span>
+        <div class="demo-stage"><div class="demo-subject" id="stage-rainbow"></div></div>
+        <label class="intensity-row"><span class="intensity-label">speed</span>
+          <input type="range" min="0.1" max="2" step="0.1" value="0.3" id="intensity-rainbow" aria-label="Vitesse de Rainbow">
+          <output id="intensity-rainbow-out">0.3/s</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="rainbow">Lancer / Arrêter</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="rainbow">Copier</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.Typewriter</span>
+        <div class="demo-stage"><span class="demo-subject text-subject" id="stage-typewriter">Site-73<span class="typewriter-cursor blinking">&nbsp;</span></span></div>
+        <label class="intensity-row"><span class="intensity-label">chars/s</span>
+          <input type="range" min="5" max="60" step="5" value="30" id="intensity-typewriter" aria-label="Vitesse de Typewriter">
+          <output id="intensity-typewriter-out">30/s</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="typewriter">Rejouer</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="typewriter">Copier</button>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <section id="installation">
+    <div class="eyebrow">Mise en route</div>
+    <h2>Installation en trois étapes</h2>
+    <p class="section-lead">Aucun gestionnaire de paquets : UIAnim est un seul ModuleScript
+      à copier dans votre jeu.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <h3>Créer le ModuleScript</h3>
+          <p>Dans l'Explorer, ajoutez un ModuleScript nommé exactement <code>UIAnim</code>
+            dans <code>ReplicatedStorage</code> (accessible client et serveur, mais les
+            animations elles-mêmes doivent être lancées depuis un LocalScript).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <h3>Coller le script</h3>
+          <p>Copiez le contenu de la section <a href="#source">Script complet</a> ci-dessous
+            dans ce ModuleScript, en remplaçant le contenu par défaut.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <h3>Importer et utiliser</h3>
+          <p>Depuis n'importe quel LocalScript, <code>require</code> le module et appelez
+            une fonction sur votre GuiObject.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="code-install">Copier</button></div>
+      <pre><code id="code-install">local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UIAnim = require(ReplicatedStorage:WaitForChild("UIAnim"))
+
+local errorFrame = script.Parent:WaitForChild("ErrorPanel")
+UIAnim.Shake(errorFrame, { intensity = 10, duration = 0.5 })</code></pre>
+    </div>
+  </section>
+
+  <section id="api">
+    <div class="eyebrow">Référence</div>
+    <h2>11 fonctions, un GuiObject à la fois</h2>
+    <p class="section-lead">Chaque fonction annule automatiquement toute animation déjà en
+      cours sur le même objet, donc pas besoin de gérer vos propres Tweens en parallèle.</p>
+
+    <div class="api-list">
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.Shake(obj, options?)</h3>
+        <p class="desc">Secoue l'objet en translation — erreurs de saisie, dégâts, impact.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">intensity</td><td>number</td><td>6</td></tr>
+          <tr><td class="pname">duration</td><td>number</td><td>0.4</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-shake">Copier</button></div>
+          <pre><code id="ex-shake">UIAnim.Shake(passwordField, { intensity = 10, duration = 0.5 })</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.Wiggle(obj, options?)</h3>
+        <p class="desc">Secoue en rotation — attire l'œil sur une icône ou un bouton.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">angle</td><td>number (°)</td><td>8</td></tr>
+          <tr><td class="pname">duration</td><td>number</td><td>0.5</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-wiggle">Copier</button></div>
+          <pre><code id="ex-wiggle">UIAnim.Wiggle(questIcon, { angle = 12 })</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.Pulse(obj, options?)</h3>
+        <p class="desc">Grossit puis revient à la taille d'origine — confirmation, notification.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">scale</td><td>number</td><td>1.15</td></tr>
+          <tr><td class="pname">duration</td><td>number</td><td>0.25</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-pulse">Copier</button></div>
+          <pre><code id="ex-pulse">UIAnim.Pulse(coinCounter, { scale = 1.3 })</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.Bounce(obj, options?)</h3>
+        <p class="desc">Entrée élastique — apparition d'un popup ou d'une récompense.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">duration</td><td>number</td><td>0.6</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-bounce">Copier</button></div>
+          <pre><code id="ex-bounce">UIAnim.Bounce(rewardPopup)</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.SlideIn(obj, options?)</h3>
+        <p class="desc">Entrée depuis un bord de l'écran.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">direction</td><td>"Top"|"Bottom"|"Left"|"Right"</td><td>"Bottom"</td></tr>
+          <tr><td class="pname">distance</td><td>number (px)</td><td>60</td></tr>
+          <tr><td class="pname">duration</td><td>number</td><td>0.35</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-slide">Copier</button></div>
+          <pre><code id="ex-slide">UIAnim.SlideIn(sidePanel, { direction = "Right", distance = 80 })</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.Flash(obj, options?)</h3>
+        <p class="desc">Clignote la couleur de fond — alerte ou surbrillance temporaire.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">color</td><td>Color3</td><td>rgb(255,70,70)</td></tr>
+          <tr><td class="pname">count</td><td>number</td><td>2</td></tr>
+          <tr><td class="pname">duration</td><td>number</td><td>0.15</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-flash">Copier</button></div>
+          <pre><code id="ex-flash">UIAnim.Flash(lowHpBar, { color = Color3.fromRGB(255,0,0), count = 3 })</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.FadeIn(obj, options?) / FadeOut(obj, options?)</h3>
+        <p class="desc">Apparition/disparition en fondu, gère la transparence de fond ou de texte.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">duration</td><td>number</td><td>0.3</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-fade">Copier</button></div>
+          <pre><code id="ex-fade">UIAnim.FadeIn(tooltip)
+UIAnim.FadeOut(tooltip, { duration = 0.5 })</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.Rainbow(obj, options?)</h3>
+        <p class="desc">Fait défiler les couleurs en continu — effet néon ou événement spécial.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">speed</td><td>number (cycles/s)</td><td>0.3</td></tr>
+          <tr><td class="pname">target</td><td>"Background"|"Text"|"Stroke"</td><td>"Background"</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-rainbow">Copier</button></div>
+          <pre><code id="ex-rainbow">UIAnim.Rainbow(eventTitle, { target = "Text", speed = 0.5 })</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.Typewriter(label, text, options?)</h3>
+        <p class="desc">Révèle un texte lettre par lettre dans un TextLabel ou TextButton.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">charsPerSecond</td><td>number</td><td>30</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-type">Copier</button></div>
+          <pre><code id="ex-type">UIAnim.Typewriter(dialogueLabel, "Bienvenue sur Site-73.", { charsPerSecond = 25 })</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.Stop(obj)</h3>
+        <p class="desc">Annule proprement toute animation en cours sur l'objet et restaure
+          un état cohérent (position, taille, rotation, transparence).</p>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-stop">Copier</button></div>
+          <pre><code id="ex-stop">UIAnim.Stop(questIcon)</code></pre></div>
+        </details>
+      </article>
+
+    </div>
+  </section>
+
+  <section id="source">
+    <div class="eyebrow">Code source</div>
+    <h2>Le script complet</h2>
+    <p class="section-lead">Un seul fichier, aucune dépendance externe. Copiez-le tel quel
+      dans votre ModuleScript <code>UIAnim</code>.</p>
+
+    <div class="code-block">
+      <div class="code-head">
+        <span class="code-lang">lua — UIAnim.lua</span>
+        <button class="copy-btn" id="copy-full-source">Copier tout le script</button>
+      </div>
+      <div class="source-shell">
+        <pre id="source-pre"><code id="source-code">--!strict
+--[[
+	UIAnim — petite librairie d'animations d'UI pour Roblox Studio.
+
+	Installation :
+		1. Créez un ModuleScript nommé "UIAnim" (par ex. dans ReplicatedStorage).
+		2. Collez tout ce fichier dedans.
+		3. Dans un LocalScript : local UIAnim = require(game.ReplicatedStorage.UIAnim)
+
+	Toutes les fonctions prennent un GuiObject (Frame, ImageLabel, TextLabel, TextButton...)
+	et une table d'options optionnelle. Elles annulent automatiquement toute animation
+	en cours sur le même objet pour éviter les conflits.
+]]
+
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local UIAnim = {}
+
+-- Un seul effet actif par objet à la fois : on stocke une fonction d'annulation.
+local activeEffects: { [Instance]: () -&gt; () } = {}
+
+local function setActive(obj: Instance, cancelFn: () -&gt; ())
+	local existing = activeEffects[obj]
+	if existing then
+		existing()
+	end
+	activeEffects[obj] = cancelFn
+end
+
+local function clearIfCurrent(obj: Instance, cancelFn: () -&gt; ())
+	if activeEffects[obj] == cancelFn then
+		activeEffects[obj] = nil
+	end
+end
+
+--- Arrête l'animation en cours sur un objet (restaure un état cohérent).
+function UIAnim.Stop(obj: Instance)
+	local existing = activeEffects[obj]
+	if existing then
+		existing()
+		activeEffects[obj] = nil
+	end
+end
+
+--------------------------------------------------------------------------
+-- Shake : secoue l'objet (ex: mauvaise saisie, erreur, impact)
+--------------------------------------------------------------------------
+export type ShakeOptions = {
+	intensity: number?, -- amplitude en pixels, défaut 6
+	duration: number?, -- durée totale en secondes, défaut 0.4
+}
+
+function UIAnim.Shake(obj: GuiObject, options: ShakeOptions?)
+	options = options or {}
+	local intensity = options.intensity or 6
+	local duration = options.duration or 0.4
+
+	local originalPosition = obj.Position
+	local elapsed = 0
+	local conn: RBXScriptConnection
+
+	local function cancel()
+		if conn then
+			conn:Disconnect()
+		end
+		obj.Position = originalPosition
+	end
+
+	conn = RunService.RenderStepped:Connect(function(dt)
+		elapsed += dt
+		if elapsed &gt;= duration then
+			cancel()
+			clearIfCurrent(obj, cancel)
+			return
+		end
+		local falloff = 1 - (elapsed / duration)
+		local offsetX = (math.random() * 2 - 1) * intensity * falloff
+		local offsetY = (math.random() * 2 - 1) * intensity * falloff
+		obj.Position = originalPosition + UDim2.fromOffset(offsetX, offsetY)
+	end)
+
+	setActive(obj, cancel)
+end
+
+--------------------------------------------------------------------------
+-- Wiggle : secoue en rotation (ex: icône qui attire l'attention)
+--------------------------------------------------------------------------
+export type WiggleOptions = {
+	angle: number?, -- degrés max, défaut 8
+	duration: number?, -- défaut 0.5
+}
+
+function UIAnim.Wiggle(obj: GuiObject, options: WiggleOptions?)
+	options = options or {}
+	local angle = options.angle or 8
+	local duration = options.duration or 0.5
+
+	local originalRotation = obj.Rotation
+	local elapsed = 0
+	local conn: RBXScriptConnection
+
+	local function cancel()
+		if conn then
+			conn:Disconnect()
+		end
+		obj.Rotation = originalRotation
+	end
+
+	conn = RunService.RenderStepped:Connect(function(dt)
+		elapsed += dt
+		if elapsed &gt;= duration then
+			cancel()
+			clearIfCurrent(obj, cancel)
+			return
+		end
+		local falloff = 1 - (elapsed / duration)
+		obj.Rotation = originalRotation + math.sin(elapsed * 40) * angle * falloff
+	end)
+
+	setActive(obj, cancel)
+end
+
+--------------------------------------------------------------------------
+-- Pulse : grossit puis revient (ex: confirmation, notification)
+--------------------------------------------------------------------------
+export type PulseOptions = {
+	scale: number?, -- facteur max, défaut 1.15
+	duration: number?, -- durée d'un aller-retour, défaut 0.25
+}
+
+function UIAnim.Pulse(obj: GuiObject, options: PulseOptions?)
+	options = options or {}
+	local scaleFactor = options.scale or 1.15
+	local duration = options.duration or 0.25
+
+	local originalSize = obj.Size
+	local grownSize = UDim2.new(
+		originalSize.X.Scale * scaleFactor,
+		originalSize.X.Offset * scaleFactor,
+		originalSize.Y.Scale * scaleFactor,
+		originalSize.Y.Offset * scaleFactor
+	)
+
+	local up = TweenService:Create(obj, TweenInfo.new(duration / 2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Size = grownSize })
+	local down = TweenService:Create(obj, TweenInfo.new(duration / 2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Size = originalSize })
+
+	local function cancel()
+		up:Cancel()
+		down:Cancel()
+		obj.Size = originalSize
+	end
+
+	up.Completed:Connect(function(state)
+		if state == Enum.PlaybackState.Completed then
+			down:Play()
+		end
+	end)
+	down.Completed:Connect(function()
+		clearIfCurrent(obj, cancel)
+	end)
+
+	setActive(obj, cancel)
+	up:Play()
+end
+
+--------------------------------------------------------------------------
+-- FadeIn / FadeOut : apparition / disparition en douceur
+--------------------------------------------------------------------------
+export type FadeOptions = {
+	duration: number?, -- défaut 0.3
+}
+
+local function getTransparencyProperty(obj: Instance): string?
+	if obj:IsA("Frame") or obj:IsA("ImageLabel") or obj:IsA("ImageButton") then
+		return "BackgroundTransparency"
+	elseif obj:IsA("TextLabel") or obj:IsA("TextButton") then
+		return "TextTransparency"
+	end
+	return nil
+end
+
+function UIAnim.FadeIn(obj: GuiObject, options: FadeOptions?)
+	options = options or {}
+	local duration = options.duration or 0.3
+
+	obj.Visible = true
+	local prop = getTransparencyProperty(obj)
+	local goal: { [string]: any } = {}
+	if prop then
+		goal[prop] = 0
+	end
+
+	local tween = TweenService:Create(obj, TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), goal)
+	local function cancel()
+		tween:Cancel()
+	end
+	tween.Completed:Connect(function()
+		clearIfCurrent(obj, cancel)
+	end)
+	setActive(obj, cancel)
+	tween:Play()
+end
+
+function UIAnim.FadeOut(obj: GuiObject, options: FadeOptions?)
+	options = options or {}
+	local duration = options.duration or 0.3
+
+	local prop = getTransparencyProperty(obj)
+	local goal: { [string]: any } = {}
+	if prop then
+		goal[prop] = 1
+	end
+
+	local tween = TweenService:Create(obj, TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.In), goal)
+	local function cancel()
+		tween:Cancel()
+	end
+	tween.Completed:Connect(function(state)
+		if state == Enum.PlaybackState.Completed then
+			obj.Visible = false
+		end
+		clearIfCurrent(obj, cancel)
+	end)
+	setActive(obj, cancel)
+	tween:Play()
+end
+
+--------------------------------------------------------------------------
+-- Bounce : rebond élastique à l'apparition
+--------------------------------------------------------------------------
+export type BounceOptions = {
+	duration: number?, -- défaut 0.6
+}
+
+function UIAnim.Bounce(obj: GuiObject, options: BounceOptions?)
+	options = options or {}
+	local duration = options.duration or 0.6
+
+	local targetSize = obj.Size
+	obj.Size = UDim2.new(targetSize.X.Scale * 0.5, targetSize.X.Offset * 0.5, targetSize.Y.Scale * 0.5, targetSize.Y.Offset * 0.5)
+
+	local tween = TweenService:Create(obj, TweenInfo.new(duration, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), { Size = targetSize })
+	local function cancel()
+		tween:Cancel()
+		obj.Size = targetSize
+	end
+	tween.Completed:Connect(function()
+		clearIfCurrent(obj, cancel)
+	end)
+	setActive(obj, cancel)
+	tween:Play()
+end
+
+--------------------------------------------------------------------------
+-- SlideIn : entre depuis un bord de l'écran
+--------------------------------------------------------------------------
+export type SlideDirection = "Top" | "Bottom" | "Left" | "Right"
+export type SlideOptions = {
+	direction: SlideDirection?, -- défaut "Bottom"
+	distance: number?, -- pixels, défaut 60
+	duration: number?, -- défaut 0.35
+}
+
+function UIAnim.SlideIn(obj: GuiObject, options: SlideOptions?)
+	options = options or {}
+	local direction = options.direction or "Bottom"
+	local distance = options.distance or 60
+	local duration = options.duration or 0.35
+
+	local targetPosition = obj.Position
+	local offsetX, offsetY = 0, 0
+	if direction == "Top" then
+		offsetY = -distance
+	elseif direction == "Bottom" then
+		offsetY = distance
+	elseif direction == "Left" then
+		offsetX = -distance
+	elseif direction == "Right" then
+		offsetX = distance
+	end
+
+	obj.Position = targetPosition + UDim2.fromOffset(offsetX, offsetY)
+	obj.Visible = true
+
+	local tween = TweenService:Create(obj, TweenInfo.new(duration, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = targetPosition })
+	local function cancel()
+		tween:Cancel()
+		obj.Position = targetPosition
+	end
+	tween.Completed:Connect(function()
+		clearIfCurrent(obj, cancel)
+	end)
+	setActive(obj, cancel)
+	tween:Play()
+end
+
+--------------------------------------------------------------------------
+-- Flash : clignote (ex: alerte, surbrillance temporaire)
+--------------------------------------------------------------------------
+export type FlashOptions = {
+	color: Color3?, -- couleur du flash, défaut rouge
+	count: number?, -- nombre de clignotements, défaut 2
+	duration: number?, -- durée d'un clignotement, défaut 0.15
+}
+
+function UIAnim.Flash(obj: GuiObject, options: FlashOptions?)
+	options = options or {}
+	local flashColor = options.color or Color3.fromRGB(255, 70, 70)
+	local count = options.count or 2
+	local duration = options.duration or 0.15
+
+	if not (obj:IsA("Frame") or obj:IsA("ImageLabel") or obj:IsA("ImageButton") or obj:IsA("TextButton") or obj:IsA("TextLabel")) then
+		return
+	end
+
+	local originalColor = (obj :: any).BackgroundColor3
+	local cancelled = false
+
+	local function cancel()
+		cancelled = true
+		;(obj :: any).BackgroundColor3 = originalColor
+	end
+	setActive(obj, cancel)
+
+	task.spawn(function()
+		for _ = 1, count do
+			if cancelled then
+				return
+			end
+			local toFlash = TweenService:Create(obj, TweenInfo.new(duration, Enum.EasingStyle.Sine), { BackgroundColor3 = flashColor })
+			toFlash:Play()
+			toFlash.Completed:Wait()
+			if cancelled then
+				return
+			end
+			local toOriginal = TweenService:Create(obj, TweenInfo.new(duration, Enum.EasingStyle.Sine), { BackgroundColor3 = originalColor })
+			toOriginal:Play()
+			toOriginal.Completed:Wait()
+		end
+		clearIfCurrent(obj, cancel)
+	end)
+end
+
+--------------------------------------------------------------------------
+-- Typewriter : révèle un texte lettre par lettre
+--------------------------------------------------------------------------
+export type TypewriterOptions = {
+	charsPerSecond: number?, -- défaut 30
+}
+
+function UIAnim.Typewriter(label: TextLabel | TextButton, fullText: string, options: TypewriterOptions?)
+	options = options or {}
+	local cps = options.charsPerSecond or 30
+
+	label.Text = ""
+	local cancelled = false
+	local function cancel()
+		cancelled = true
+		label.Text = fullText
+	end
+	setActive(label, cancel)
+
+	task.spawn(function()
+		local charDelay = 1 / cps
+		for i = 1, #fullText do
+			if cancelled then
+				return
+			end
+			label.Text = string.sub(fullText, 1, i)
+			task.wait(charDelay)
+		end
+		clearIfCurrent(label, cancel)
+	end)
+end
+
+--------------------------------------------------------------------------
+-- Rainbow : fait défiler les couleurs (ex: effet néon/fun)
+--------------------------------------------------------------------------
+export type RainbowOptions = {
+	speed: number?, -- cycles par seconde, défaut 0.3
+	target: ("Background" | "Text" | "Stroke")?, -- défaut "Background"
+}
+
+function UIAnim.Rainbow(obj: GuiObject, options: RainbowOptions?)
+	options = options or {}
+	local speed = options.speed or 0.3
+	local target = options.target or "Background"
+
+	local conn: RBXScriptConnection
+	local hue = 0
+
+	local function cancel()
+		if conn then
+			conn:Disconnect()
+		end
+	end
+
+	conn = RunService.RenderStepped:Connect(function(dt)
+		hue = (hue + dt * speed) % 1
+		local color = Color3.fromHSV(hue, 0.85, 1)
+		if target == "Background" and (obj :: any):FindFirstAncestorOrSelf then
+			pcall(function()
+				(obj :: any).BackgroundColor3 = color
+			end)
+		elseif target == "Text" then
+			pcall(function()
+				(obj :: any).TextColor3 = color
+			end)
+		elseif target == "Stroke" then
+			local stroke = obj:FindFirstChildOfClass("UIStroke")
+			if stroke then
+				stroke.Color = color
+			end
+		end
+	end)
+
+	setActive(obj, cancel)
+end
+
+return UIAnim
+</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>UIAnim — licence MIT. Fonctionne uniquement depuis un LocalScript (TweenService et
+      RunService côté client). Écrit pour Luau en mode strict, sans dépendance externe.</p>
+    <p>v4nishr@gmail.com</p>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var EFFECTS = {
+    shake:      { code:function(v){ return 'UIAnim.Shake(target, { intensity = ' + v + ', duration = 0.4 })'; } },
+    wiggle:     { code:function(v){ return 'UIAnim.Wiggle(target, { angle = ' + v + ' })'; } },
+    pulse:      { code:function(v){ return 'UIAnim.Pulse(target, { scale = ' + v + ' })'; } },
+    bounce:     { code:function(v){ return 'UIAnim.Bounce(target, { duration = ' + v + ' })'; } },
+    slide:      { code:function(v){ return 'UIAnim.SlideIn(target, { direction = "Right", distance = ' + v + ' })'; } },
+    flash:      { code:function(v){ return 'UIAnim.Flash(target, { count = ' + v + ' })'; } },
+    fade:       { code:function(v){ return 'UIAnim.FadeOut(target, { duration = ' + v + ' })\nUIAnim.FadeIn(target, { duration = ' + v + ' })'; } },
+    rainbow:    { code:function(v){ return 'UIAnim.Rainbow(target, { speed = ' + v + ' })'; } },
+    typewriter: { code:function(v){ return 'UIAnim.Typewriter(target, "Site-73", { charsPerSecond = ' + v + ' })'; } }
+  };
+
+  function unitLabel(kind, v){
+    if(kind === 'shake' || kind === 'slide') return v + 'px';
+    if(kind === 'wiggle') return v + '°';
+    if(kind === 'pulse' || kind === 'flash') return v + '×';
+    if(kind === 'bounce' || kind === 'fade') return v + 's';
+    if(kind === 'rainbow' || kind === 'typewriter') return v + '/s';
+    return v;
+  }
+
+  Object.keys(EFFECTS).forEach(function(kind){
+    var input = document.getElementById('intensity-' + kind);
+    var out = document.getElementById('intensity-' + kind + '-out');
+    if(!input || !out) return;
+    input.addEventListener('input', function(){ out.textContent = unitLabel(kind, input.value); });
+  });
+
+  function playOnce(el, cls){
+    if(!el) return;
+    el.classList.remove(cls);
+    void el.offsetWidth;
+    el.classList.add(cls);
+    el.addEventListener('animationend', function handler(){
+      el.classList.remove(cls);
+      el.removeEventListener('animationend', handler);
+    });
+  }
+
+  document.querySelectorAll('[data-demo]').forEach(function(btn){
+    var kind = btn.getAttribute('data-demo');
+    btn.addEventListener('click', function(){
+      var slider = document.getElementById('intensity-' + kind);
+      var value = slider ? slider.value : null;
+      var stage = document.getElementById('stage-' + kind);
+
+      if(kind === 'fade'){
+        stage.style.transitionDuration = value + 's';
+        stage.classList.toggle('is-faded');
+        return;
+      }
+      if(kind === 'rainbow'){
+        stage.style.animationDuration = (1 / parseFloat(value)) + 's';
+        stage.classList.toggle('anim-rainbow');
+        return;
+      }
+      if(kind === 'typewriter'){
+        var text = 'Site-73';
+        var i = 0;
+        var delay = 1000 / parseFloat(value);
+        stage.childNodes[0].nodeValue = '';
+        var iv = setInterval(function(){
+          i++;
+          stage.childNodes[0].nodeValue = text.slice(0, i);
+          if(i >= text.length) clearInterval(iv);
+        }, delay);
+        return;
+      }
+      if(kind === 'bounce'){
+        stage.style.animationDuration = value + 's';
+        playOnce(stage, 'anim-bounce');
+        return;
+      }
+      if(kind === 'flash'){
+        stage.style.animationIterationCount = value;
+        playOnce(stage, 'anim-flash');
+        return;
+      }
+      var unit = kind === 'wiggle' ? 'deg' : (kind === 'pulse' ? '' : 'px');
+      stage.style.setProperty('--fx-amt', value + unit);
+      playOnce(stage, 'anim-' + kind);
+    });
+  });
+
+  document.querySelectorAll('[data-copy-demo]').forEach(function(btn){
+    var kind = btn.getAttribute('data-copy-demo');
+    btn.dataset.label = btn.textContent;
+    btn.addEventListener('click', function(){
+      var slider = document.getElementById('intensity-' + kind);
+      var value = slider ? slider.value : '';
+      var cfg = EFFECTS[kind];
+      if(cfg) copyText(cfg.code(value), btn);
+    });
+  });
+
+  function copyText(text, btn){
+    function done(ok){
+      if(!btn) return;
+      btn.textContent = ok ? 'Copié ✓' : 'Sélectionnez le texte';
+      btn.classList.toggle('copied', ok);
+      setTimeout(function(){
+        btn.textContent = btn.dataset.label || 'Copier';
+        btn.classList.remove('copied');
+      }, 1800);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ done(true); }, function(){ done(false); });
+    } else {
+      done(false);
+    }
+  }
+
+  document.querySelectorAll('.copy-btn[data-copy-target]').forEach(function(btn){
+    btn.dataset.label = btn.textContent;
+    btn.addEventListener('click', function(){
+      var target = document.getElementById(btn.getAttribute('data-copy-target'));
+      if(target) copyText(target.textContent, btn);
+    });
+  });
+
+  var fullSourceCode = document.getElementById('source-code');
+  var copyFullBtn = document.getElementById('copy-full-source');
+  copyFullBtn.dataset.label = copyFullBtn.textContent;
+  copyFullBtn.addEventListener('click', function(){
+    copyText(fullSourceCode.textContent, copyFullBtn);
+  });
+
+})();
+</script>
