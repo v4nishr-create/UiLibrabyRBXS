@@ -2,18 +2,18 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
-<meta name="description" content="UIAnim : librairie Lua gratuite pour animer les interfaces Roblox Studio. Shake, pulse, bounce, slide, flash, fade et rainbow prêts à copier-coller, sans dépendance.">
-<meta name="keywords" content="roblox studio, lua, luau, animation ui, roblox gui, tween, shake effect, roblox scripting, module script">
+<meta name="description" content="UIAnim : librairie Lua gratuite avec 20 animations pour Roblox Studio. Shake, pulse, bounce, glow, scramble, wave, glitch et plus — prêtes à copier-coller, sans dépendance.">
+<meta name="keywords" content="roblox studio, lua, luau, animation ui, roblox gui, tween, shake effect, text animation, roblox scripting, module script">
 <meta property="og:type" content="website">
 <meta property="og:title" content="UIAnim — animations d'UI pour Roblox Studio">
-<meta property="og:description" content="Librairie Lua gratuite : shake, pulse, bounce, fade, slide, flash, rainbow, typewriter pour vos GUI Roblox. Copiez-collez dans un ModuleScript.">
+<meta property="og:description" content="Librairie Lua gratuite avec 20 animations : shake, pulse, bounce, glow, scramble, wave, glitch, countup et plus pour vos GUI Roblox.">
 <meta name="twitter:card" content="summary">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "SoftwareSourceCode",
   "name": "UIAnim",
-  "description": "Librairie Lua pour animer les interfaces utilisateur dans Roblox Studio : shake, pulse, bounce, slide, flash, fade, rainbow, typewriter.",
+  "description": "Librairie Lua avec 20 fonctions pour animer les interfaces utilisateur dans Roblox Studio : shake, pulse, bounce, glow, scramble, wave, glitch, countup et plus.",
   "programmingLanguage": "Lua",
   "runtimePlatform": "Roblox Studio",
   "license": "https://opensource.org/licenses/MIT"
@@ -169,6 +169,45 @@
     .anim-rainbow{animation:demoRainbow 3s linear infinite;}
   }
   @keyframes demoRainbow{to{filter:hue-rotate(360deg);}}
+  @keyframes demoFloat{0%,100%{transform:translateY(calc(var(--fx-amt,6px) * -1))}50%{transform:translateY(var(--fx-amt,6px))}}
+  @keyframes demoSpin{to{transform:rotate(360deg)}}
+  @keyframes demoGlow{0%,100%{box-shadow:0 0 0 0 var(--demo-base)}50%{box-shadow:0 0 16px 4px var(--demo-base)}}
+  @keyframes demoGlitch{0%,100%{transform:translate3d(0,0,0);color:inherit}10%{transform:translate3d(var(--fx-amt,4px),0,0);color:var(--accent-2)}20%{transform:translate3d(calc(var(--fx-amt,4px) * -1),0,0)}30%{transform:translate3d(0,0,0);color:inherit}45%{transform:translate3d(calc(var(--fx-amt,4px) * 0.6),0,0);color:var(--accent-2)}60%{transform:translate3d(0,0,0);color:inherit}75%{transform:translate3d(calc(var(--fx-amt,4px) * -0.6),0,0)}90%,100%{transform:translate3d(0,0,0);color:inherit}}
+  @keyframes demoMenuLoop{0%,100%{transform:scale(1)}50%{transform:scale(var(--fx-amt,1.05))}}
+  @media (prefers-reduced-motion: no-preference){
+    .anim-float{animation:demoFloat 1.6s ease-in-out infinite;}
+    .anim-spin{animation:demoSpin 2s linear infinite;}
+    .anim-glow{animation:demoGlow 1.2s ease-in-out infinite;}
+    .anim-glitch{animation:demoGlitch .4s steps(1,end) both;}
+    .anim-menuloop{animation:demoMenuLoop 3s ease-in-out infinite;}
+  }
+  .menu-stage{position:relative;}
+  .menu-backdrop{
+    position:absolute; inset:0; background:#000; opacity:0;
+    transition:opacity var(--menu-dur,.35s) ease;
+  }
+  .menu-panel{
+    position:relative; width:46px; height:46px; border-radius:10px; background:var(--accent);
+    transform:scale(.85); opacity:0;
+    transition:transform var(--menu-dur,.35s) cubic-bezier(.34,1.56,.64,1), opacity var(--menu-dur,.35s) ease;
+  }
+  .menu-stage.is-open .menu-backdrop{opacity:.55;}
+  .menu-stage.is-open .menu-panel{transform:scale(1); opacity:1;}
+  .progress-track{
+    width:100%; height:10px; border-radius:999px; background:var(--surface-2);
+    overflow:hidden; border:1px solid var(--border);
+  }
+  .progress-fill{
+    height:100%; width:0%; border-radius:999px;
+    background:linear-gradient(90deg, var(--accent), var(--accent-2));
+    transition:width .5s cubic-bezier(.25,.8,.35,1);
+  }
+  .ripple-dot{
+    position:absolute; left:50%; top:50%; width:10px; height:10px; border-radius:999px;
+    background:var(--accent-2); pointer-events:none; opacity:.8;
+  }
+  .wave-stage{display:inline-flex;}
+  .wave-letter{display:inline-block; font-family:var(--font-display); font-weight:700; color:var(--accent);}
   .is-faded{opacity:0; transition:opacity .35s ease;}
   .fade-subject{transition:opacity .35s ease;}
   .typewriter-cursor{display:inline-block; width:2px; background:var(--accent); margin-left:2px;}
@@ -275,9 +314,9 @@
   <header class="hero" id="demo">
     <div class="eyebrow">Librairie Luau — animations d'UI</div>
     <h1>Des interfaces Roblox qui bougent, sans réinventer le tween.</h1>
-    <p class="lead">UIAnim est un module Luau unique qui ajoute shake, pulse, bounce, fade,
-      slide, flash, rainbow et typewriter à n'importe quel GuiObject. Un require, un appel
-      de fonction, c'est animé.</p>
+    <p class="lead">UIAnim est un module Luau unique qui ajoute 23 animations — shake, pulse,
+      bounce, glow, scramble, wave, glitch, et l'ouverture/fermeture de menus — à n'importe
+      quel GuiObject ou TextLabel. Un require, un appel de fonction, c'est animé.</p>
     <div class="hero-ctas">
       <a class="btn btn-accent" href="#source">Copier le script</a>
       <a class="btn btn-ghost" href="#installation">Voir l'installation</a>
@@ -286,7 +325,7 @@
       <span class="badge">Luau strict</span>
       <span class="badge">Licence MIT</span>
       <span class="badge">Zéro dépendance</span>
-      <span class="badge">~250 lignes</span>
+      <span class="badge">23 fonctions</span>
     </div>
 
     <div class="demo-grid">
@@ -399,6 +438,141 @@
         </div>
       </div>
 
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.Float</span>
+        <div class="demo-stage"><div class="demo-subject" id="stage-float"></div></div>
+        <label class="intensity-row"><span class="intensity-label">amplitude</span>
+          <input type="range" min="2" max="20" step="1" value="6" id="intensity-float" aria-label="Amplitude de Float">
+          <output id="intensity-float-out">6px</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="float">Lancer / Arrêter</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="float">Copier</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.Spin</span>
+        <div class="demo-stage"><div class="demo-subject" id="stage-spin"></div></div>
+        <label class="intensity-row"><span class="intensity-label">speed</span>
+          <input type="range" min="30" max="720" step="30" value="180" id="intensity-spin" aria-label="Vitesse de Spin">
+          <output id="intensity-spin-out">180/s</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="spin">Lancer / Arrêter</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="spin">Copier</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.Glow</span>
+        <div class="demo-stage"><div class="demo-subject" id="stage-glow"></div></div>
+        <label class="intensity-row"><span class="intensity-label">speed</span>
+          <input type="range" min="0.2" max="2" step="0.1" value="0.8" id="intensity-glow" aria-label="Vitesse de Glow">
+          <output id="intensity-glow-out">0.8/s</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="glow">Lancer / Arrêter</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="glow">Copier</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.ProgressTo</span>
+        <div class="demo-stage"><div class="progress-track"><div class="progress-fill" id="stage-progress"></div></div></div>
+        <label class="intensity-row"><span class="intensity-label">target</span>
+          <input type="range" min="10" max="100" step="5" value="70" id="intensity-progress" aria-label="Cible de ProgressTo">
+          <output id="intensity-progress-out">70%</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="progress">Tester</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="progress">Copier</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.Ripple</span>
+        <div class="demo-stage" id="stage-ripple"><div class="demo-subject" style="background:transparent;border:1px solid var(--border);"></div></div>
+        <label class="intensity-row"><span class="intensity-label">duration</span>
+          <input type="range" min="0.2" max="1.2" step="0.1" value="0.5" id="intensity-ripple" aria-label="Durée de Ripple">
+          <output id="intensity-ripple-out">0.5s</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="ripple">Tester</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="ripple">Copier</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.CountUp</span>
+        <div class="demo-stage"><span class="demo-subject text-subject" id="stage-countup">0</span></div>
+        <label class="intensity-row"><span class="intensity-label">cible</span>
+          <input type="range" min="50" max="5000" step="50" value="1250" id="intensity-countup" aria-label="Valeur cible de CountUp">
+          <output id="intensity-countup-out">1250</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="countup">Tester</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="countup">Copier</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.Scramble</span>
+        <div class="demo-stage"><span class="demo-subject text-subject" id="stage-scramble">SITE-73</span></div>
+        <label class="intensity-row"><span class="intensity-label">duration</span>
+          <input type="range" min="0.2" max="1.5" step="0.1" value="0.6" id="intensity-scramble" aria-label="Durée de Scramble">
+          <output id="intensity-scramble-out">0.6s</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="scramble">Tester</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="scramble">Copier</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.WaveText</span>
+        <div class="demo-stage"><span class="demo-subject text-subject wave-stage" id="stage-wave"></span></div>
+        <label class="intensity-row"><span class="intensity-label">cadence</span>
+          <input type="range" min="0.02" max="0.14" step="0.02" value="0.04" id="intensity-wave" aria-label="Cadence de WaveText">
+          <output id="intensity-wave-out">0.04s</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="wave">Tester</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="wave">Copier</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.Glitch</span>
+        <div class="demo-stage"><span class="demo-subject text-subject" id="stage-glitch">SITE-73</span></div>
+        <label class="intensity-row"><span class="intensity-label">intensity</span>
+          <input type="range" min="1" max="10" step="1" value="4" id="intensity-glitch" aria-label="Intensité de Glitch">
+          <output id="intensity-glitch-out">4px</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="glitch">Tester</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="glitch">Copier</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.MenuIn / MenuOut</span>
+        <div class="demo-stage menu-stage" id="stage-menu">
+          <div class="menu-backdrop"></div>
+          <div class="menu-panel"></div>
+        </div>
+        <label class="intensity-row"><span class="intensity-label">duration</span>
+          <input type="range" min="0.15" max="0.6" step="0.05" value="0.35" id="intensity-menu" aria-label="Durée de MenuIn/MenuOut">
+          <output id="intensity-menu-out">0.35s</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="menu">Ouvrir / Fermer</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="menu">Copier</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <span class="demo-name">UIAnim.MenuLoop</span>
+        <div class="demo-stage"><div class="demo-subject" id="stage-menuloop"></div></div>
+        <label class="intensity-row"><span class="intensity-label">speed</span>
+          <input type="range" min="0.1" max="1" step="0.05" value="0.25" id="intensity-menuloop" aria-label="Vitesse de MenuLoop">
+          <output id="intensity-menuloop-out">0.25/s</output></label>
+        <div class="demo-actions">
+          <button class="btn" data-demo="menuloop">Lancer / Arrêter</button>
+          <button class="btn btn-ghost copy-demo" data-copy-demo="menuloop">Copier</button>
+        </div>
+      </div>
+
     </div>
   </header>
 
@@ -448,9 +622,10 @@ UIAnim.Shake(errorFrame, { intensity = 10, duration = 0.5 })</code></pre>
 
   <section id="api">
     <div class="eyebrow">Référence</div>
-    <h2>11 fonctions, un GuiObject à la fois</h2>
-    <p class="section-lead">Chaque fonction annule automatiquement toute animation déjà en
-      cours sur le même objet, donc pas besoin de gérer vos propres Tweens en parallèle.</p>
+    <h2>23 fonctions, un GuiObject à la fois</h2>
+    <p class="section-lead">Mouvement, texte et feedback — Shake à Glitch. Chaque fonction
+      annule automatiquement toute animation déjà en cours sur le même objet, donc pas besoin
+      de gérer vos propres Tweens en parallèle.</p>
 
     <div class="api-list">
 
@@ -577,6 +752,190 @@ UIAnim.FadeOut(tooltip, { duration = 0.5 })</code></pre></div>
         <details class="api-example"><summary>Exemple</summary>
           <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-type">Copier</button></div>
           <pre><code id="ex-type">UIAnim.Typewriter(dialogueLabel, "Bienvenue sur Site-73.", { charsPerSecond = 25 })</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.Float(obj, options?)</h3>
+        <p class="desc">Fait flotter l'objet en continu — icône de collectible, item rare.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">amplitude</td><td>number (px)</td><td>6</td></tr>
+          <tr><td class="pname">speed</td><td>number (cycles/s)</td><td>0.6</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-float">Copier</button></div>
+          <pre><code id="ex-float">UIAnim.Float(lootIcon, { amplitude = 8, speed = 0.5 })</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.Spin(obj, options?)</h3>
+        <p class="desc">Rotation continue — icône de chargement, roue de butin.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">speed</td><td>number (°/s)</td><td>180</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-spin">Copier</button></div>
+          <pre><code id="ex-spin">UIAnim.Spin(loadingIcon, { speed = 240 })</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.Glow(obj, options?)</h3>
+        <p class="desc">Halo (UIStroke) qui pulse en continu — élément actif ou disponible.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">color</td><td>Color3</td><td>blanc</td></tr>
+          <tr><td class="pname">speed</td><td>number (cycles/s)</td><td>0.8</td></tr>
+          <tr><td class="pname">maxThickness</td><td>number</td><td>3</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-glow">Copier</button></div>
+          <pre><code id="ex-glow">UIAnim.Glow(claimButton, { color = Color3.fromRGB(80,230,255) })</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.ProgressTo(bar, targetScale, options?)</h3>
+        <p class="desc">Anime le remplissage d'une barre (Size.X.Scale) — vie, XP, chargement.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">duration</td><td>number</td><td>0.5</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-progress">Copier</button></div>
+          <pre><code id="ex-progress">UIAnim.ProgressTo(healthBar, 0.4, { duration = 0.6 })</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.Ripple(obj, options?)</h3>
+        <p class="desc">Cercle qui s'étend et disparaît — feedback de clic sur un bouton.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">color</td><td>Color3</td><td>blanc</td></tr>
+          <tr><td class="pname">duration</td><td>number</td><td>0.5</td></tr>
+          <tr><td class="pname">startScale</td><td>number</td><td>0.1</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-ripple">Copier</button></div>
+          <pre><code id="ex-ripple">button.MouseButton1Down:Connect(function()
+    UIAnim.Ripple(button)
+end)</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.CountUp(label, from, to, options?)</h3>
+        <p class="desc">Anime un nombre affiché — score, monnaie, points d'expérience.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">duration</td><td>number</td><td>1</td></tr>
+          <tr><td class="pname">decimals</td><td>number</td><td>0</td></tr>
+          <tr><td class="pname">prefix</td><td>string</td><td>""</td></tr>
+          <tr><td class="pname">suffix</td><td>string</td><td>""</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-countup">Copier</button></div>
+          <pre><code id="ex-countup">UIAnim.CountUp(coinLabel, 0, 1250, { duration = 1.2, suffix = " coins" })</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.Scramble(label, finalText, options?)</h3>
+        <p class="desc">Effet de décodage — caractères aléatoires qui se fixent sur le texte final.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">duration</td><td>number</td><td>0.6</td></tr>
+          <tr><td class="pname">charset</td><td>string</td><td>A-Z 0-9</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-scramble">Copier</button></div>
+          <pre><code id="ex-scramble">UIAnim.Scramble(terminalLabel, "ACCÈS AUTORISÉ", { duration = 0.8 })</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.WaveText(container, text, options?)</h3>
+        <p class="desc">Fait entrer un texte lettre par lettre avec un rebond en vague — titre, dialogue.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">staggerDelay</td><td>number</td><td>0.04</td></tr>
+          <tr><td class="pname">bounceHeight</td><td>number (px)</td><td>10</td></tr>
+          <tr><td class="pname">duration</td><td>number</td><td>0.3</td></tr>
+          <tr><td class="pname">color</td><td>Color3</td><td>blanc</td></tr>
+          <tr><td class="pname">textSize</td><td>number</td><td>24</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-wave">Copier</button></div>
+          <pre><code id="ex-wave">UIAnim.WaveText(titleFrame, "SITE-73", { staggerDelay = 0.05 })</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.Glitch(label, options?)</h3>
+        <p class="desc">Léger effet de distorsion numérique — erreur, ambiance sci-fi.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">duration</td><td>number</td><td>0.4</td></tr>
+          <tr><td class="pname">intensity</td><td>number (px)</td><td>4</td></tr>
+          <tr><td class="pname">glitchColor</td><td>Color3</td><td>cyan</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-glitch">Copier</button></div>
+          <pre><code id="ex-glitch">UIAnim.Glitch(errorLabel, { intensity = 6 })</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.MenuIn(panel, options?)</h3>
+        <p class="desc">Ouvre un menu — scale + fade, avec fond (backdrop) optionnel qui s'estompe en même temps.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">duration</td><td>number</td><td>0.35</td></tr>
+          <tr><td class="pname">fromScale</td><td>number</td><td>0.85</td></tr>
+          <tr><td class="pname">backdrop</td><td>GuiObject</td><td>nil</td></tr>
+          <tr><td class="pname">backdropTransparency</td><td>number</td><td>0.5</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-menuin">Copier</button></div>
+          <pre><code id="ex-menuin">openButton.MouseButton1Click:Connect(function()
+    UIAnim.MenuIn(inventoryPanel, { backdrop = dimFrame })
+end)</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.MenuOut(panel, options?)</h3>
+        <p class="desc">Ferme un menu — anime puis cache le panneau (Visible = false) à la fin.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">duration</td><td>number</td><td>0.25</td></tr>
+          <tr><td class="pname">toScale</td><td>number</td><td>0.85</td></tr>
+          <tr><td class="pname">backdrop</td><td>GuiObject</td><td>nil</td></tr>
+          <tr><td class="pname">onComplete</td><td>function</td><td>nil</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-menuout">Copier</button></div>
+          <pre><code id="ex-menuout">closeButton.MouseButton1Click:Connect(function()
+    UIAnim.MenuOut(inventoryPanel, { backdrop = dimFrame })
+end)</code></pre></div>
+        </details>
+      </article>
+
+      <article class="api-card">
+        <h3><span class="fn-dot">ƒ</span> UIAnim.MenuLoop(obj, options?)</h3>
+        <p class="desc">Respiration douce en boucle tant qu'un menu reste ouvert, pour qu'il ne semble jamais figé.</p>
+        <table class="param-table">
+          <tr><th>Option</th><th>Type</th><th>Défaut</th></tr>
+          <tr><td class="pname">scale</td><td>number</td><td>1.015</td></tr>
+          <tr><td class="pname">speed</td><td>number (cycles/s)</td><td>0.25</td></tr>
+        </table>
+        <details class="api-example"><summary>Exemple</summary>
+          <div class="code-block"><div class="code-head"><span class="code-lang">lua</span><button class="copy-btn" data-copy-target="ex-menuloop">Copier</button></div>
+          <pre><code id="ex-menuloop">UIAnim.MenuLoop(inventoryPanel, { speed = 0.3 })</code></pre></div>
         </details>
       </article>
 
@@ -1025,6 +1384,563 @@ function UIAnim.Rainbow(obj: GuiObject, options: RainbowOptions?)
 	setActive(obj, cancel)
 end
 
+--------------------------------------------------------------------------
+-- Float : oscillation verticale continue (ex: icône flottante, collectible)
+--------------------------------------------------------------------------
+export type FloatOptions = {
+	amplitude: number?, -- pixels, défaut 6
+	speed: number?, -- cycles par seconde, défaut 0.6
+}
+
+function UIAnim.Float(obj: GuiObject, options: FloatOptions?)
+	options = options or {}
+	local amplitude = options.amplitude or 6
+	local speed = options.speed or 0.6
+
+	local originalPosition = obj.Position
+	local elapsed = 0
+	local conn: RBXScriptConnection
+
+	local function cancel()
+		if conn then
+			conn:Disconnect()
+		end
+		obj.Position = originalPosition
+	end
+
+	conn = RunService.RenderStepped:Connect(function(dt)
+		elapsed += dt
+		local offsetY = math.sin(elapsed * speed * math.pi * 2) * amplitude
+		obj.Position = originalPosition + UDim2.fromOffset(0, offsetY)
+	end)
+
+	setActive(obj, cancel)
+end
+
+--------------------------------------------------------------------------
+-- Spin : rotation continue (ex: icône de chargement, roue de butin)
+--------------------------------------------------------------------------
+export type SpinOptions = {
+	speed: number?, -- degrés par seconde, défaut 180
+}
+
+function UIAnim.Spin(obj: GuiObject, options: SpinOptions?)
+	options = options or {}
+	local speed = options.speed or 180
+
+	local conn: RBXScriptConnection
+
+	local function cancel()
+		if conn then
+			conn:Disconnect()
+		end
+	end
+
+	conn = RunService.RenderStepped:Connect(function(dt)
+		obj.Rotation = (obj.Rotation + speed * dt) % 360
+	end)
+
+	setActive(obj, cancel)
+end
+
+--------------------------------------------------------------------------
+-- Glow : halo (UIStroke) qui pulse en continu (ex: élément actif/disponible)
+--------------------------------------------------------------------------
+export type GlowOptions = {
+	color: Color3?, -- défaut blanc
+	speed: number?, -- cycles par seconde, défaut 0.8
+	maxThickness: number?, -- défaut 3
+}
+
+function UIAnim.Glow(obj: GuiObject, options: GlowOptions?)
+	options = options or {}
+	local color = options.color or Color3.fromRGB(255, 255, 255)
+	local speed = options.speed or 0.8
+	local maxThickness = options.maxThickness or 3
+
+	local stroke = obj:FindFirstChildOfClass("UIStroke")
+	local createdStroke = false
+	if not stroke then
+		stroke = Instance.new("UIStroke")
+		stroke.Thickness = 0
+		stroke.Parent = obj
+		createdStroke = true
+	end
+
+	local existingStroke = stroke :: UIStroke
+	local elapsed = 0
+	local conn: RBXScriptConnection
+
+	local function cancel()
+		if conn then
+			conn:Disconnect()
+		end
+		if createdStroke then
+			existingStroke:Destroy()
+		else
+			existingStroke.Thickness = 0
+		end
+	end
+
+	conn = RunService.RenderStepped:Connect(function(dt)
+		elapsed += dt
+		local pulse = (math.sin(elapsed * speed * math.pi * 2) + 1) / 2
+		existingStroke.Color = color
+		existingStroke.Thickness = pulse * maxThickness
+	end)
+
+	setActive(obj, cancel)
+end
+
+--------------------------------------------------------------------------
+-- ProgressTo : anime le remplissage d'une barre (Size.X.Scale)
+--------------------------------------------------------------------------
+export type ProgressOptions = {
+	duration: number?, -- défaut 0.5
+}
+
+function UIAnim.ProgressTo(bar: GuiObject, targetScale: number, options: ProgressOptions?)
+	options = options or {}
+	local duration = options.duration or 0.5
+
+	local currentSize = bar.Size
+	local goalSize = UDim2.new(targetScale, currentSize.X.Offset, currentSize.Y.Scale, currentSize.Y.Offset)
+
+	local tween = TweenService:Create(bar, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Size = goalSize })
+	local function cancel()
+		tween:Cancel()
+	end
+	tween.Completed:Connect(function()
+		clearIfCurrent(bar, cancel)
+	end)
+	setActive(bar, cancel)
+	tween:Play()
+end
+
+--------------------------------------------------------------------------
+-- Ripple : cercle qui s'étend et disparaît (ex: feedback de clic)
+--------------------------------------------------------------------------
+export type RippleOptions = {
+	color: Color3?, -- défaut blanc
+	duration: number?, -- défaut 0.5
+	startScale: number?, -- taille de départ (fraction du plus petit côté), défaut 0.1
+}
+
+function UIAnim.Ripple(obj: GuiObject, options: RippleOptions?)
+	options = options or {}
+	local color = options.color or Color3.fromRGB(255, 255, 255)
+	local duration = options.duration or 0.5
+	local startScale = options.startScale or 0.1
+
+	local wasClipping = obj.ClipsDescendants
+	obj.ClipsDescendants = true
+
+	local size = math.min(obj.AbsoluteSize.X, obj.AbsoluteSize.Y)
+	local circle = Instance.new("Frame")
+	circle.AnchorPoint = Vector2.new(0.5, 0.5)
+	circle.Position = UDim2.fromScale(0.5, 0.5)
+	circle.Size = UDim2.fromOffset(size * startScale, size * startScale)
+	circle.BackgroundColor3 = color
+	circle.BackgroundTransparency = 0.4
+	circle.BorderSizePixel = 0
+	circle.ZIndex = obj.ZIndex + 1
+	circle.Parent = obj
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(1, 0)
+	corner.Parent = circle
+
+	local tween = TweenService:Create(circle, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Size = UDim2.fromOffset(size * 1.6, size * 1.6),
+		BackgroundTransparency = 1,
+	})
+
+	tween.Completed:Connect(function()
+		circle:Destroy()
+		obj.ClipsDescendants = wasClipping
+	end)
+	tween:Play()
+end
+
+--------------------------------------------------------------------------
+-- CountUp : anime un nombre affiché dans un TextLabel (score, monnaie, XP)
+--------------------------------------------------------------------------
+export type CountUpOptions = {
+	duration: number?, -- défaut 1
+	decimals: number?, -- défaut 0
+	prefix: string?, -- défaut ""
+	suffix: string?, -- défaut ""
+}
+
+function UIAnim.CountUp(label: TextLabel | TextButton, from: number, to: number, options: CountUpOptions?)
+	options = options or {}
+	local duration = options.duration or 1
+	local decimals = options.decimals or 0
+	local prefix = options.prefix or ""
+	local suffix = options.suffix or ""
+
+	local function format(value: number): string
+		return prefix .. string.format("%." .. decimals .. "f", value) .. suffix
+	end
+
+	local elapsed = 0
+	local conn: RBXScriptConnection
+
+	local function cancel()
+		if conn then
+			conn:Disconnect()
+		end
+		label.Text = format(to)
+	end
+
+	conn = RunService.RenderStepped:Connect(function(dt)
+		elapsed += dt
+		local t = math.clamp(elapsed / duration, 0, 1)
+		local eased = 1 - (1 - t) * (1 - t)
+		label.Text = format(from + (to - from) * eased)
+		if t &gt;= 1 then
+			if conn then
+				conn:Disconnect()
+			end
+			clearIfCurrent(label, cancel)
+		end
+	end)
+
+	setActive(label, cancel)
+end
+
+--------------------------------------------------------------------------
+-- Scramble : effet de décodage, caractères aléatoires qui se fixent
+--------------------------------------------------------------------------
+export type ScrambleOptions = {
+	duration: number?, -- défaut 0.6
+	charset: string?, -- défaut lettres majuscules + chiffres
+}
+
+local DEFAULT_SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+function UIAnim.Scramble(label: TextLabel | TextButton, finalText: string, options: ScrambleOptions?)
+	options = options or {}
+	local duration = options.duration or 0.6
+	local charset = options.charset or DEFAULT_SCRAMBLE_CHARS
+
+	local length = #finalText
+	local elapsed = 0
+	local conn: RBXScriptConnection
+
+	local function randomChar(): string
+		local i = math.random(1, #charset)
+		return string.sub(charset, i, i)
+	end
+
+	local function cancel()
+		if conn then
+			conn:Disconnect()
+		end
+		label.Text = finalText
+	end
+
+	conn = RunService.RenderStepped:Connect(function(dt)
+		elapsed += dt
+		local revealCount = math.floor((elapsed / duration) * length)
+		if revealCount &gt;= length then
+			if conn then
+				conn:Disconnect()
+			end
+			label.Text = finalText
+			clearIfCurrent(label, cancel)
+			return
+		end
+		local builder = {}
+		for i = 1, length do
+			if i &lt;= revealCount then
+				table.insert(builder, string.sub(finalText, i, i))
+			else
+				table.insert(builder, randomChar())
+			end
+		end
+		label.Text = table.concat(builder)
+	end)
+
+	setActive(label, cancel)
+end
+
+--------------------------------------------------------------------------
+-- WaveText : fait entrer un texte lettre par lettre avec un rebond en vague
+--------------------------------------------------------------------------
+export type WaveTextOptions = {
+	staggerDelay: number?, -- délai entre chaque lettre, défaut 0.04
+	bounceHeight: number?, -- pixels, défaut 10
+	duration: number?, -- durée du rebond par lettre, défaut 0.3
+	color: Color3?, -- défaut blanc
+	textSize: number?, -- défaut 24
+}
+
+function UIAnim.WaveText(container: Frame, text: string, options: WaveTextOptions?)
+	options = options or {}
+	local staggerDelay = options.staggerDelay or 0.04
+	local bounceHeight = options.bounceHeight or 10
+	local duration = options.duration or 0.3
+	local color = options.color or Color3.new(1, 1, 1)
+	local textSize = options.textSize or 24
+
+	container:ClearAllChildren()
+
+	local layout = Instance.new("UIListLayout")
+	layout.FillDirection = Enum.FillDirection.Horizontal
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Parent = container
+
+	local cancelled = false
+	local letters: { TextLabel } = {}
+
+	for i = 1, #text do
+		local char = string.sub(text, i, i)
+		local charLabel = Instance.new("TextLabel")
+		charLabel.Name = "Char" .. i
+		charLabel.LayoutOrder = i
+		charLabel.Size = UDim2.fromOffset(0, container.AbsoluteSize.Y)
+		charLabel.AutomaticSize = Enum.AutomaticSize.X
+		charLabel.BackgroundTransparency = 1
+		charLabel.Text = char
+		charLabel.TextColor3 = color
+		charLabel.TextSize = textSize
+		charLabel.Font = Enum.Font.GothamBold
+		charLabel.Parent = container
+		table.insert(letters, charLabel)
+	end
+
+	local function cancel()
+		cancelled = true
+	end
+	setActive(container, cancel)
+
+	task.spawn(function()
+		for _, charLabel in ipairs(letters) do
+			if cancelled then
+				return
+			end
+			local startPos = charLabel.Position
+			charLabel.Position = startPos - UDim2.fromOffset(0, bounceHeight)
+			TweenService:Create(charLabel, TweenInfo.new(duration, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = startPos }):Play()
+			task.wait(staggerDelay)
+		end
+		clearIfCurrent(container, cancel)
+	end)
+end
+
+--------------------------------------------------------------------------
+-- Glitch : léger effet de distorsion numérique (ex: erreur, ambiance sci-fi)
+--------------------------------------------------------------------------
+export type GlitchOptions = {
+	duration: number?, -- défaut 0.4
+	intensity: number?, -- pixels, défaut 4
+	glitchColor: Color3?, -- défaut cyan
+}
+
+function UIAnim.Glitch(label: TextLabel | TextButton, options: GlitchOptions?)
+	options = options or {}
+	local duration = options.duration or 0.4
+	local intensity = options.intensity or 4
+	local glitchColor = options.glitchColor or Color3.fromRGB(80, 230, 255)
+
+	local originalPosition = label.Position
+	local originalColor = label.TextColor3
+	local elapsed = 0
+	local conn: RBXScriptConnection
+
+	local function cancel()
+		if conn then
+			conn:Disconnect()
+		end
+		label.Position = originalPosition
+		label.TextColor3 = originalColor
+	end
+
+	conn = RunService.RenderStepped:Connect(function(dt)
+		elapsed += dt
+		if elapsed &gt;= duration then
+			cancel()
+			clearIfCurrent(label, cancel)
+			return
+		end
+		if math.random() &lt; 0.5 then
+			local offsetX = (math.random() * 2 - 1) * intensity
+			label.Position = originalPosition + UDim2.fromOffset(offsetX, 0)
+			label.TextColor3 = glitchColor
+		else
+			label.Position = originalPosition
+			label.TextColor3 = originalColor
+		end
+	end)
+
+	setActive(label, cancel)
+end
+
+--------------------------------------------------------------------------
+-- MenuIn : ouverture d'un menu (scale + fade, avec fond optionnel)
+--------------------------------------------------------------------------
+export type MenuInOptions = {
+	duration: number?, -- défaut 0.35
+	fromScale: number?, -- défaut 0.85
+	backdrop: GuiObject?, -- Frame de fond à estomper en même temps
+	backdropTransparency: number?, -- transparence finale du fond, défaut 0.5
+}
+
+function UIAnim.MenuIn(panel: GuiObject, options: MenuInOptions?)
+	options = options or {}
+	local duration = options.duration or 0.35
+	local fromScale = options.fromScale or 0.85
+	local backdrop = options.backdrop
+	local backdropTransparency = options.backdropTransparency or 0.5
+
+	local targetSize = panel.Size
+	local shrunkSize = UDim2.new(
+		targetSize.X.Scale * fromScale, targetSize.X.Offset * fromScale,
+		targetSize.Y.Scale * fromScale, targetSize.Y.Offset * fromScale
+	)
+
+	panel.Size = shrunkSize
+	panel.Visible = true
+
+	local panelProp = getTransparencyProperty(panel)
+	local goal: { [string]: any } = { Size = targetSize }
+	if panelProp then
+		(panel :: any)[panelProp] = 1
+		goal[panelProp] = 0
+	end
+
+	local tween = TweenService:Create(panel, TweenInfo.new(duration, Enum.EasingStyle.Back, Enum.EasingDirection.Out), goal)
+
+	local backdropTween: Tween? = nil
+	if backdrop then
+		backdrop.Visible = true
+		backdrop.BackgroundTransparency = 1
+		backdropTween = TweenService:Create(backdrop, TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { BackgroundTransparency = backdropTransparency })
+	end
+
+	local function cancel()
+		tween:Cancel()
+		if backdropTween then
+			backdropTween:Cancel()
+		end
+	end
+
+	tween.Completed:Connect(function()
+		clearIfCurrent(panel, cancel)
+	end)
+
+	setActive(panel, cancel)
+	tween:Play()
+	if backdropTween then
+		backdropTween:Play()
+	end
+end
+
+--------------------------------------------------------------------------
+-- MenuOut : fermeture d'un menu (scale + fade inverse, caché à la fin)
+--------------------------------------------------------------------------
+export type MenuOutOptions = {
+	duration: number?, -- défaut 0.25
+	toScale: number?, -- défaut 0.85
+	backdrop: GuiObject?,
+	onComplete: (() -&gt; ())?,
+}
+
+function UIAnim.MenuOut(panel: GuiObject, options: MenuOutOptions?)
+	options = options or {}
+	local duration = options.duration or 0.25
+	local toScale = options.toScale or 0.85
+	local backdrop = options.backdrop
+	local onComplete = options.onComplete
+
+	local originalSize = panel.Size
+	local shrunkSize = UDim2.new(
+		originalSize.X.Scale * toScale, originalSize.X.Offset * toScale,
+		originalSize.Y.Scale * toScale, originalSize.Y.Offset * toScale
+	)
+
+	local panelProp = getTransparencyProperty(panel)
+	local goal: { [string]: any } = { Size = shrunkSize }
+	if panelProp then
+		goal[panelProp] = 1
+	end
+
+	local tween = TweenService:Create(panel, TweenInfo.new(duration, Enum.EasingStyle.Back, Enum.EasingDirection.In), goal)
+
+	local backdropTween: Tween? = nil
+	if backdrop then
+		backdropTween = TweenService:Create(backdrop, TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.In), { BackgroundTransparency = 1 })
+	end
+
+	local function cancel()
+		tween:Cancel()
+		if backdropTween then
+			backdropTween:Cancel()
+		end
+	end
+
+	tween.Completed:Connect(function(state)
+		if state == Enum.PlaybackState.Completed then
+			panel.Visible = false
+			panel.Size = originalSize
+			if panelProp then
+				(panel :: any)[panelProp] = 0
+			end
+			if backdrop then
+				backdrop.Visible = false
+			end
+			if onComplete then
+				onComplete()
+			end
+		end
+		clearIfCurrent(panel, cancel)
+	end)
+
+	setActive(panel, cancel)
+	tween:Play()
+	if backdropTween then
+		backdropTween:Play()
+	end
+end
+
+--------------------------------------------------------------------------
+-- MenuLoop : respiration douce en boucle tant qu'un menu reste ouvert
+--------------------------------------------------------------------------
+export type MenuLoopOptions = {
+	scale: number?, -- amplitude de l'échelle, défaut 1.015
+	speed: number?, -- cycles par seconde, défaut 0.25
+}
+
+function UIAnim.MenuLoop(obj: GuiObject, options: MenuLoopOptions?)
+	options = options or {}
+	local scaleAmplitude = options.scale or 1.015
+	local speed = options.speed or 0.25
+
+	local originalSize = obj.Size
+	local elapsed = 0
+	local conn: RBXScriptConnection
+
+	local function cancel()
+		if conn then
+			conn:Disconnect()
+		end
+		obj.Size = originalSize
+	end
+
+	conn = RunService.RenderStepped:Connect(function(dt)
+		elapsed += dt
+		local pulse = (math.sin(elapsed * speed * math.pi * 2) + 1) / 2
+		local factor = 1 + (scaleAmplitude - 1) * pulse
+		obj.Size = UDim2.new(
+			originalSize.X.Scale * factor, originalSize.X.Offset * factor,
+			originalSize.Y.Scale * factor, originalSize.Y.Offset * factor
+		)
+	end)
+
+	setActive(obj, cancel)
+end
+
 return UIAnim
 </code></pre>
       </div>
@@ -1052,15 +1968,29 @@ return UIAnim
     flash:      { code:function(v){ return 'UIAnim.Flash(target, { count = ' + v + ' })'; } },
     fade:       { code:function(v){ return 'UIAnim.FadeOut(target, { duration = ' + v + ' })\nUIAnim.FadeIn(target, { duration = ' + v + ' })'; } },
     rainbow:    { code:function(v){ return 'UIAnim.Rainbow(target, { speed = ' + v + ' })'; } },
-    typewriter: { code:function(v){ return 'UIAnim.Typewriter(target, "Site-73", { charsPerSecond = ' + v + ' })'; } }
+    typewriter: { code:function(v){ return 'UIAnim.Typewriter(target, "Site-73", { charsPerSecond = ' + v + ' })'; } },
+    float:      { code:function(v){ return 'UIAnim.Float(target, { amplitude = ' + v + ' })'; } },
+    spin:       { code:function(v){ return 'UIAnim.Spin(target, { speed = ' + v + ' })'; } },
+    glow:       { code:function(v){ return 'UIAnim.Glow(target, { speed = ' + v + ' })'; } },
+    progress:   { code:function(v){ return 'UIAnim.ProgressTo(healthBar, ' + (parseFloat(v) / 100) + ', { duration = 0.5 })'; } },
+    ripple:     { code:function(v){ return 'UIAnim.Ripple(target, { duration = ' + v + ' })'; } },
+    countup:    { code:function(v){ return 'UIAnim.CountUp(coinLabel, 0, ' + v + ', { duration = 1 })'; } },
+    scramble:   { code:function(v){ return 'UIAnim.Scramble(target, "SITE-73", { duration = ' + v + ' })'; } },
+    wave:       { code:function(v){ return 'UIAnim.WaveText(target, "SITE-73", { staggerDelay = ' + v + ' })'; } },
+    glitch:     { code:function(v){ return 'UIAnim.Glitch(target, { intensity = ' + v + ' })'; } },
+    menu:       { code:function(v){ return 'UIAnim.MenuIn(menuPanel, { backdrop = backdrop, duration = ' + v + ' })\nUIAnim.MenuOut(menuPanel, { backdrop = backdrop, duration = ' + v + ' })'; } },
+    menuloop:   { code:function(v){ return 'UIAnim.MenuLoop(menuPanel, { speed = ' + v + ' })'; } }
   };
 
   function unitLabel(kind, v){
-    if(kind === 'shake' || kind === 'slide') return v + 'px';
+    if(kind === 'shake' || kind === 'slide' || kind === 'float' || kind === 'glitch') return v + 'px';
     if(kind === 'wiggle') return v + '°';
     if(kind === 'pulse' || kind === 'flash') return v + '×';
-    if(kind === 'bounce' || kind === 'fade') return v + 's';
-    if(kind === 'rainbow' || kind === 'typewriter') return v + '/s';
+    if(kind === 'bounce' || kind === 'fade' || kind === 'ripple' || kind === 'scramble' || kind === 'menu') return v + 's';
+    if(kind === 'rainbow' || kind === 'typewriter' || kind === 'spin' || kind === 'glow' || kind === 'menuloop') return v + '/s';
+    if(kind === 'progress') return v + '%';
+    if(kind === 'countup') return v;
+    if(kind === 'wave') return v + 's';
     return v;
   }
 
@@ -1119,6 +2049,104 @@ return UIAnim
       if(kind === 'flash'){
         stage.style.animationIterationCount = value;
         playOnce(stage, 'anim-flash');
+        return;
+      }
+      if(kind === 'float'){
+        stage.style.setProperty('--fx-amt', value + 'px');
+        stage.classList.toggle('anim-float');
+        return;
+      }
+      if(kind === 'spin'){
+        stage.style.animationDuration = (360 / parseFloat(value)) + 's';
+        stage.classList.toggle('anim-spin');
+        return;
+      }
+      if(kind === 'glow'){
+        stage.style.animationDuration = (1 / parseFloat(value)) + 's';
+        stage.classList.toggle('anim-glow');
+        return;
+      }
+      if(kind === 'progress'){
+        stage.style.width = value + '%';
+        return;
+      }
+      if(kind === 'ripple'){
+        var dot = document.createElement('span');
+        dot.className = 'ripple-dot';
+        stage.appendChild(dot);
+        var dur = parseFloat(value) * 1000;
+        var anim = dot.animate([
+          { transform:'translate(-50%,-50%) scale(0.2)', opacity:0.9 },
+          { transform:'translate(-50%,-50%) scale(9)', opacity:0 }
+        ], { duration: dur, easing:'cubic-bezier(.25,.8,.35,1)' });
+        anim.onfinish = function(){ dot.remove(); };
+        return;
+      }
+      if(kind === 'countup'){
+        var target = parseFloat(value);
+        var startTime = null;
+        var dur2 = 1000;
+        function stepCount(ts){
+          if(!startTime) startTime = ts;
+          var t = Math.min((ts - startTime) / dur2, 1);
+          var eased = 1 - (1 - t) * (1 - t);
+          stage.textContent = Math.round(target * eased).toLocaleString('fr-FR');
+          if(t < 1) requestAnimationFrame(stepCount);
+        }
+        requestAnimationFrame(stepCount);
+        return;
+      }
+      if(kind === 'scramble'){
+        var finalText = 'SITE-73';
+        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        var dur3 = parseFloat(value) * 1000;
+        var start3 = null;
+        function stepScramble(ts){
+          if(!start3) start3 = ts;
+          var t = (ts - start3) / dur3;
+          var revealCount = Math.floor(t * finalText.length);
+          if(revealCount >= finalText.length){ stage.textContent = finalText; return; }
+          var out = '';
+          for(var i = 0; i < finalText.length; i++){
+            out += i <= revealCount ? finalText[i] : chars[Math.floor(Math.random() * chars.length)];
+          }
+          stage.textContent = out;
+          requestAnimationFrame(stepScramble);
+        }
+        requestAnimationFrame(stepScramble);
+        return;
+      }
+      if(kind === 'wave'){
+        var text = 'SITE-73';
+        stage.innerHTML = '';
+        var staggerMs = parseFloat(value) * 1000;
+        text.split('').forEach(function(ch, idx){
+          var span = document.createElement('span');
+          span.className = 'wave-letter';
+          span.textContent = ch === ' ' ? ' ' : ch;
+          stage.appendChild(span);
+          span.animate([
+            { transform:'translateY(10px)', opacity:0 },
+            { transform:'translateY(-6px)', opacity:1, offset:0.6 },
+            { transform:'translateY(0)', opacity:1 }
+          ], { duration:300, delay: idx * staggerMs, easing:'cubic-bezier(.34,1.56,.64,1)', fill:'backwards' });
+        });
+        return;
+      }
+      if(kind === 'glitch'){
+        stage.style.setProperty('--fx-amt', value + 'px');
+        playOnce(stage, 'anim-glitch');
+        return;
+      }
+      if(kind === 'menu'){
+        stage.style.setProperty('--menu-dur', value + 's');
+        stage.classList.toggle('is-open');
+        return;
+      }
+      if(kind === 'menuloop'){
+        stage.style.setProperty('--fx-amt', '1.05');
+        stage.style.animationDuration = (1 / parseFloat(value)) + 's';
+        stage.classList.toggle('anim-menuloop');
         return;
       }
       var unit = kind === 'wiggle' ? 'deg' : (kind === 'pulse' ? '' : 'px');
